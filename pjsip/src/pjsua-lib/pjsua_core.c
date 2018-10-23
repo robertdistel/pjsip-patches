@@ -410,6 +410,47 @@ PJ_DEF(void) pjsua_media_config_default(pjsua_media_config *cfg)
     cfg->vid_preview_enable_native = PJ_TRUE;
 }
 
+
+//sometimes MIME can be non-ASCII encoded with non-printable characters - we want a sane printout when this is true
+
+static void pj_sprintf_non_printable_chars(const char* source, int s_len, char* dest, int* d_len)
+{
+	//generate a print buffer that has non-printable chars escaped
+	int i,j;
+	j=0;
+	for (i=0; i<s_len; i++)
+	{
+		if (source[i] < 0x20 && source[i]!='\n' && source[i]!='\r')
+		{
+			//this is a non-printable char
+			if (j+6 < *d_len) //and we have space
+			{
+				j=j+sprintf(&dest[j]," 0x%02x ",(unsigned char)source[i]);
+			}
+		}
+		else
+		{
+			//this is a non-printable char
+			if (j < *d_len) //and we have space
+			{
+				dest[j]=source[i];
+				j++;
+			}
+
+		}
+	}
+	if(j<*d_len)
+	{
+		dest[j]=0;
+	}
+	else
+	{
+		dest[(*d_len)-1]=0;
+	}
+
+	*dest=j;
+}
+
 /*****************************************************************************
  * This is a very simple PJSIP module, whose sole purpose is to display
  * incoming and outgoing messages to log. This module will have priority
@@ -427,33 +468,43 @@ PJ_DEF(void) pjsua_media_config_default(pjsua_media_config *cfg)
 /* Notification on incoming messages */
 static pj_bool_t logging_on_rx_msg(pjsip_rx_data *rdata)
 {
-    char addr[PJ_INET6_ADDRSTRLEN+10];
+	char print_buffer[5000];
+	int buff_sz = sizeof(print_buffer);
+
+	char addr[PJ_INET6_ADDRSTRLEN+10];
     pj_str_t input_str = pj_str(rdata->pkt_info.src_name);
+
+    pj_sprintf_non_printable_chars(rdata->msg_info.msg_buf,(int)rdata->msg_info.len,print_buffer,&buff_sz);
 
     PJ_LOG(4,(THIS_FILE, "RX %d bytes %s from %s %s:\n"
 			 "%.*s\n"
 			 "--end msg--",
 			 rdata->msg_info.len,
 			 pjsip_rx_data_get_info(rdata),
-			 rdata->tp_info.transport->type_name,	      
-			 pj_addr_str_print(&input_str, 
-					   rdata->pkt_info.src_port, 
+			 rdata->tp_info.transport->type_name,
+			 pj_addr_str_print(&input_str,
+					   rdata->pkt_info.src_port,
 					   addr,
-					   sizeof(addr), 
+					   sizeof(addr),
 					   1),
 			 (int)rdata->msg_info.len,
-			 rdata->msg_info.msg_buf));
-    
+			 print_buffer /*rdata->msg_info.msg_buf*/));
+
     /* Always return false, otherwise messages will not get processed! */
     return PJ_FALSE;
 }
 
+
 /* Notification on outgoing messages */
 static pj_status_t logging_on_tx_msg(pjsip_tx_data *tdata)
 {
+	char print_buffer[5000];
+	int buff_sz = sizeof(print_buffer);
+
     char addr[PJ_INET6_ADDRSTRLEN+10];
     pj_str_t input_str = pj_str(tdata->tp_info.dst_name);
     
+    pj_sprintf_non_printable_chars(tdata->buf.start,(int)(tdata->buf.cur - tdata->buf.start),print_buffer,&buff_sz);
     /* Important note:
      *	tp_info field is only valid after outgoing messages has passed
      *	transport layer. So don't try to access tp_info when the module
@@ -471,7 +522,7 @@ static pj_status_t logging_on_tx_msg(pjsip_tx_data *tdata)
 					   sizeof(addr), 
 					   1),
 			 (int)(tdata->buf.cur - tdata->buf.start),
-			 tdata->buf.start));
+			 print_buffer/*tdata->buf.start*/));
 
 
     /* Always return success, otherwise message will not get sent! */

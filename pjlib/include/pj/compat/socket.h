@@ -74,6 +74,11 @@
 #   define PJ_SOCK_HAS_GETADDRINFO  1
 #endif	/* _MSC_VER */
 
+#ifdef PJ_OVERRIDE__FD_SETSIZE
+#define __FD_SETSIZE (PJ_OVERRIDE__FD_SETSIZE)
+#endif
+
+
 #if defined(PJ_HAS_SYS_TYPES_H) && PJ_HAS_SYS_TYPES_H != 0
 #  include <sys/types.h>
 #endif

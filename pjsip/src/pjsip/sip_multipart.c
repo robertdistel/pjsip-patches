@@ -28,6 +28,8 @@
 #include <pj/pool.h>
 #include <pj/string.h>
 
+//remove comment to enable content-length in multipart mime - according to the standard this is not required
+//#define CONTENT_LENGTH_IN_MULTIPART
 #define THIS_FILE		"sip_multipart.c"
 
 #define IS_SPACE(c)	((c)==' ' || (c)=='\t')
@@ -117,7 +119,7 @@ static int multipart_print_body(struct pjsip_msg_body *msg_body,
 	    p += pjsip_media_type_print(p, (unsigned)(end-p), media);
 	    *p++ = '\r';
 	    *p++ = '\n';
-
+#ifdef CONTENT_LENGTH_IN_MULTIPART //we should NOT print content-length in a multipart message
 	    /* Add Content-Length header. */
 	    if ((end-p) < clen_hdr.slen + 12 + 2) {
 		return -1;
@@ -134,6 +136,7 @@ static int multipart_print_body(struct pjsip_msg_body *msg_body,
 	    p += CLEN_SPACE;
 	    *p++ = '\r';
 	    *p++ = '\n';
+#endif
 	}
 
 	/* Empty newline */
@@ -146,7 +149,7 @@ static int multipart_print_body(struct pjsip_msg_body *msg_body,
 	    if (printed < 0)
 		return -1;
 	    p += printed;
-
+#ifdef CONTENT_LENGTH_IN_MULTIPART
 	    /* Now that we have the length of the body, print this to the
 	     * Content-Length header.
 	     */
@@ -158,6 +161,8 @@ static int multipart_print_body(struct pjsip_msg_body *msg_body,
 		if (len > CLEN_SPACE) len = CLEN_SPACE;
 		pj_memcpy(clen_pos+CLEN_SPACE-len, tmp, len);
 	    }
+#endif
+
 	}
 
 	part = part->next;
