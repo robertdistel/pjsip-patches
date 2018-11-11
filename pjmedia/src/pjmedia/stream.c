@@ -1730,7 +1730,10 @@ static void handle_incoming_dtmf( pjmedia_stream *stream,
     }
 }
 
+//make sure that RTCP statistics are maintained and sent when other party sends media even when
+//when we think media is paused.
 
+#define UPDATE_RTCP_ON_RX_PAUSE
 /*
  * This callback is called by stream transport on receipt of packets
  * in the RTP socket.
@@ -1786,10 +1789,13 @@ static void on_rx_rtp( pjmedia_tp_cb_param *param)
     	return;
     }
 
-    /* Ignore the packet if decoder is paused */
+
     pj_bzero(&seq_st, sizeof(seq_st));
+    /* Ignore the packet if decoder is paused */
+#ifndef UPDATE_RTCP_ON_RX_PAUSE
     if (channel->paused)
 	goto on_return;
+#endif
 
     /* Update RTP session (also checks if RTP session can accept
      * the incoming packet.
@@ -1835,6 +1841,9 @@ static void on_rx_rtp( pjmedia_tp_cb_param *param)
 	goto on_return;
     }
 
+    //handle only if channel not paused
+    if (!channel->paused)
+    {
     /* Handle incoming DTMF. */
     if (hdr->pt == stream->rx_event_pt) {
 	/* Ignore out-of-order packet as it will be detected as new
@@ -1846,6 +1855,7 @@ static void on_rx_rtp( pjmedia_tp_cb_param *param)
 
 	handle_incoming_dtmf(stream, payload, payloadlen);
 	goto on_return;
+    }
     }
 
     /* See if source address of RTP packet is different than the 
@@ -1903,6 +1913,11 @@ static void on_rx_rtp( pjmedia_tp_cb_param *param)
 	    }
 	}
     }
+
+#ifdef UPDATE_RTCP_ON_RX_PAUSE
+    if (channel->paused)
+	goto on_return;
+#endif
 
     /* Put "good" packet to jitter buffer, or reset the jitter buffer
      * when RTP session is restarted.
@@ -2048,6 +2063,9 @@ static void on_rx_rtp( pjmedia_tp_cb_param *param)
     pj_mutex_unlock( stream->jb_mutex );
 
 
+#ifdef UPDATE_RTCP_ON_RX_PAUSE
+on_return:
+#endif
     /* Check if now is the time to transmit RTCP SR/RR report.
      * We only do this when stream direction is "decoding only",
      * because otherwise check_tx_rtcp() will be handled by put_frame()
@@ -2063,7 +2081,9 @@ static void on_rx_rtp( pjmedia_tp_cb_param *param)
 	goto on_return;
     }
 
+#ifndef UPDATE_RTCP_ON_RX_PAUSE
 on_return:
+#endif
     /* Update RTCP session */
     if (stream->rtcp.peer_ssrc == 0)
 	stream->rtcp.peer_ssrc = channel->rtp.peer_ssrc;
