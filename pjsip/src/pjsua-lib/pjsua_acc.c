@@ -1332,6 +1332,7 @@ PJ_DEF(pj_status_t) pjsua_acc_modify( pjsua_acc_id acc_id,
     acc->cfg.nat64_opt = cfg->nat64_opt;
     acc->cfg.ipv6_media_use = cfg->ipv6_media_use;
     acc->cfg.enable_rtcp_mux = cfg->enable_rtcp_mux;
+    acc->cfg.lock_codec = cfg->lock_codec;
 
     /* STUN and Media customization */
     if (acc->cfg.sip_stun_use != cfg->sip_stun_use) {
@@ -1780,7 +1781,8 @@ static pj_bool_t acc_check_nat_addr(pjsua_acc *acc,
     PJ_LOG(3,(THIS_FILE, "IP address change detected for account %d "
 			 "(%s --> %s). Updating registration "
 			 "(using method %d)",
-			 acc->index, host_addr_buf, via_addr_buf));
+			 acc->index, host_addr_buf, via_addr_buf,
+			 contact_rewrite_method));
 
     pj_assert(contact_rewrite_method == PJSUA_CONTACT_REWRITE_UNREGISTER ||
 	      contact_rewrite_method == PJSUA_CONTACT_REWRITE_NO_UNREG ||
@@ -3950,14 +3952,16 @@ pj_status_t pjsua_acc_handle_call_on_ip_change(pjsua_acc *acc)
 	    {
 		acc->ip_change_op = PJSUA_IP_CHANGE_OP_ACC_REINVITE_CALLS;
 
+		pjsua_call_cleanup_flag(&call_info.setting);
 		call_info.setting.flag |=
 					 acc->cfg.ip_change_cfg.reinvite_flags;
 
 		PJ_LOG(3, (THIS_FILE, "call to %.*s: send "
 			   "re-INVITE with flags 0x%x triggered "
-			   "by IP change",
+			   "by IP change (IP change flag: 0x%x)",
 			   call_info.remote_info.slen,
 			   call_info.remote_info.ptr,
+			   call_info.setting.flag,
 			   acc->cfg.ip_change_cfg.reinvite_flags));
 
 		status = pjsua_call_reinvite(i, call_info.setting.flag, NULL);
