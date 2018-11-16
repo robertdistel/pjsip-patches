@@ -1809,6 +1809,13 @@ PJ_DEF(pj_bool_t) pjsua_call_is_active(pjsua_call_id call_id)
 	   pjsua_var.calls[call_id].inv->state != PJSIP_INV_STATE_DISCONNECTED;
 }
 
+#if 1
+#define SLEEP_TIME 500
+#define PJSUA_ACQUIRE_CALL_TIMEOUT 10000
+#else
+#define SLEEP_TIME (retry/10)
+#endif
+
 
 /* Acquire lock to the specified call_id */
 pj_status_t acquire_call(const char *title,
@@ -1843,7 +1850,7 @@ pj_status_t acquire_call(const char *title,
 
 	status = PJSUA_TRY_LOCK();
 	if (status != PJ_SUCCESS) {
-	    pj_thread_sleep(retry/10);
+	    pj_thread_sleep(SLEEP_TIME);
 	    continue;
 	}
 
@@ -1863,7 +1870,7 @@ pj_status_t acquire_call(const char *title,
 	status = pjsip_dlg_try_inc_lock(dlg);
 	if (status != PJ_SUCCESS) {
 	    PJSUA_UNLOCK();
-	    pj_thread_sleep(retry/10);
+	    pj_thread_sleep(SLEEP_TIME);
 	    continue;
 	}
 
