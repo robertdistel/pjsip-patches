@@ -81,7 +81,7 @@ endif
 endif
 endif
 
-ifneq (,1)
+ifneq (1,1)
 ifeq (0,1)
 APP_THIRD_PARTY_EXT += -lspeex -lspeexdsp
 else
@@ -95,7 +95,7 @@ endif
 endif
 endif
 
-ifneq (,1)
+ifneq (1,1)
 APP_THIRD_PARTY_LIB_FILES += $(PJ_DIR)/third_party/lib/libilbccodec-$(LIB_SUFFIX)
 ifeq ($(PJ_SHARED_LIBRARIES),)
 APP_THIRD_PARTY_LIBS += -lilbccodec-$(TARGET_NAME)
@@ -203,7 +203,7 @@ export APP_CFLAGS := -DPJ_AUTOCONF=1\
 	-I$(PJDIR)/pjnath/include\
 	-I$(PJDIR)/pjmedia/include\
 	-I$(PJDIR)/pjsip/include
-export APP_CXXFLAGS := -g -O2 $(APP_CFLAGS)
+export APP_CXXFLAGS := -g -std=c++11 $(APP_CFLAGS)
 export APP_LDFLAGS := -L$(PJDIR)/pjlib/lib\
 	-L$(PJDIR)/pjlib-util/lib\
 	-L$(PJDIR)/pjnath/lib\
@@ -314,5 +314,5 @@ export PJ_INSTALL_DIR := /usr/local
 export PJ_INSTALL_INC_DIR := ${prefix}/include
 export PJ_INSTALL_LIB_DIR := ${exec_prefix}/lib
 export PJ_INSTALL_CFLAGS := -I$(PJ_INSTALL_INC_DIR) -DPJ_AUTOCONF=1 -g -DPJ_IS_BIG_ENDIAN=0 -DPJ_IS_LITTLE_ENDIAN=1
-export PJ_INSTALL_CXXFLAGS := -g -O2 $(PJ_INSTALL_CFLAGS)
+export PJ_INSTALL_CXXFLAGS := -g -std=c++11 $(PJ_INSTALL_CFLAGS)
 export PJ_INSTALL_LDFLAGS := -L$(PJ_INSTALL_LIB_DIR) $(APP_LDLIBS)

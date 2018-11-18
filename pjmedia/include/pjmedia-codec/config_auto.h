@@ -49,20 +49,20 @@
 
 /* Speex codec */
 #ifndef PJMEDIA_HAS_SPEEX_CODEC
-/* #undef PJMEDIA_HAS_SPEEX_CODEC */
+#define PJMEDIA_HAS_SPEEX_CODEC 0
 #endif
 
 /* #undef PJMEDIA_EXTERNAL_SPEEX_CODEC */
 
 /* iLBC codec */
 #ifndef PJMEDIA_HAS_ILBC_CODEC
-/* #undef PJMEDIA_HAS_ILBC_CODEC */
+#define PJMEDIA_HAS_ILBC_CODEC 0
 #endif
 
 
 /* G722 codec */
 #ifndef PJMEDIA_HAS_G722_CODEC
-/* #undef PJMEDIA_HAS_G722_CODEC */
+#define PJMEDIA_HAS_G722_CODEC 0
 #endif
 
 /* G7221 codec */

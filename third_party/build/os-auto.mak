@@ -7,14 +7,14 @@ DIRS += gsm
 endif
 endif
 
-ifneq (,1)
+ifneq (1,1)
 DIRS += ilbc
 endif
 
 # Exclude Speex?
 EXCLUDE_SPEEX = 0
-ifeq (,1)
-ifneq (,)
+ifeq (1,1)
+ifneq (-DPJMEDIA_HAS_SPEEX_AEC=0,)
 EXCLUDE_SPEEX = 1
 endif
 endif
