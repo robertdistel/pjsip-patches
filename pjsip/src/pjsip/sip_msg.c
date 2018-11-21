@@ -604,6 +604,17 @@ PJ_DEF(const pj_str_t*) pjsip_get_status_text(int code)
 	&status_phrase[code] : &status_phrase[0];
 }
 
+PJ_DEF(const pj_str_t*) pjsip_get_status_text2(int code)
+{
+	pj_str_t* ptr;
+    ptr = pjsip_get_status_text(code);
+    if (ptr==&status_phrase[0])
+    	return 0;
+    return ptr;
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////////////
 /*
  * Media type

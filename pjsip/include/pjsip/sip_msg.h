@@ -486,6 +486,9 @@ typedef enum pjsip_status_code
  * @return		    textual message for the status code.
  */ 
 PJ_DECL(const pj_str_t*) pjsip_get_status_text(int status_code);
+/*alternative that returns null on invalid message*/
+
+PJ_DECL(const pj_str_t*) pjsip_get_status_text2(int status_code);
 
 /**
  * This macro returns non-zero (TRUE) if the specified status_code is
@@ -495,7 +498,7 @@ PJ_DECL(const pj_str_t*) pjsip_get_status_text(int status_code);
  * @param code_class	The status code in the class (for example 100, 200).
  */
 #define PJSIP_IS_STATUS_IN_CLASS(status_code, code_class)    \
-	    (status_code/100 == code_class/100)
+	    (status_code/100 == code_class/100 )
 
 /**
  * @}

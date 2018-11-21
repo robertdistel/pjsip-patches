@@ -1810,7 +1810,7 @@ PJ_DEF(pj_bool_t) pjsua_call_is_active(pjsua_call_id call_id)
 }
 
 #if 1
-#define SLEEP_TIME 500
+#define SLEEP_TIME 5
 #define PJSUA_ACQUIRE_CALL_TIMEOUT 10000
 #else
 #define SLEEP_TIME (retry/10)
@@ -1848,7 +1848,9 @@ pj_status_t acquire_call(const char *title,
 
 	has_pjsua_lock = PJ_FALSE;
 
-	status = PJSUA_TRY_LOCK();
+//	status = PJSUA_TRY_LOCK();  //remove deadlock protection at this point
+	 PJSUA_LOCK();
+	 status = PJ_SUCCESS;
 	if (status != PJ_SUCCESS) {
 	    pj_thread_sleep(SLEEP_TIME);
 	    continue;

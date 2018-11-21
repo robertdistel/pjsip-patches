@@ -248,7 +248,7 @@ static pj_status_t create_rtp_rtcp_sock(pjsua_call_media *call_med,
 					pjmedia_sock_info *skinfo)
 {
     enum {
-	RTP_RETRY = 100
+	RTP_RETRY = 1000 //increase this size so we can step over/around another generator process allocating ports like crazy
     };
     int i;
     pj_bool_t use_ipv6, use_nat64;
